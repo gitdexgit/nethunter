@@ -1,0 +1,7 @@
+/usr/local/lib
+├── @fsouza/prettierd@0.26.2
+├── gtop@1.1.5
+├── neovim@5.4.0
+├── prettier@3.6.2
+└── tree-sitter-cli@0.25.10
+

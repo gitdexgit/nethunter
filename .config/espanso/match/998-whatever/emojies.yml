@@ -1,0 +1,52 @@
+matches:
+
+  - trigger: ";;;y;"
+    replace: "/me Gives a Thumbs Up (y)"
+
+  - trigger: ";;;y]"
+    replace: "^Thumbs Up (y)"
+
+  - trigger: ";;;k]"
+    replace: "OK (y)"
+  - trigger: ";;;k;"
+    replace: "✔"
+  - trigger: ";;;ok;"
+    replace: "[OK]"
+  - trigger: ";;;task;"
+    replace: "- [ ] "
+  - trigger: ";;;b;"
+    replace: "- [ ] "
+  - trigger: ";;;block;"
+    replace: "- [ ] "
+  - trigger: ";;;todo;"
+    replace: "- [ ] "
+  - trigger: ";;;d;"
+    replace: "[x] "
+  - trigger: ";;;done;"
+    replace: "- [x] "
+
+  - trigger: ";;;t;"
+    replace: "b(^_^)d"
+  - trigger: ";;;t]"
+    replace: "Nice! b(^_^)d"
+
+  - trigger: ";;;c]"
+    replace: "^Gives a 🍪(Cookie) to $|$ !"
+
+  - trigger: ";;;c;"
+    replace: "me ^Gives a Thanks Cookie 🍪! Ty for the help"
+
+  - trigger: ";;;cookie;"
+    replace: "🍪"
+
+  - trigger: ";;;cat;"
+    replace: "🐱"
+  - trigger: ";;;x;"
+    replace: "❌"
+  - trigger: ";;;sparkles;"
+    replace: "✨"
+    
+  - trigger: ";;;heart;"
+    replace: "❤"
+  - trigger: ";;;f;"
+    replace: "(^^)"

@@ -1,0 +1,210 @@
+#!/bin/bash
+
+# --- 1. Define the COMPLETE list of sessions to manage ---
+# REMOVED: "dropdown" and "main"
+SESSIONS=("config" "cpu" "task" "mixer" "autoshot" "btop" "jobs" "logs" "rewind" "phone" "draft" "scratch" "wiki" "brightness" "sync" "duck")
+
+# --- 2. Cleanup Phase ---
+echo "--- Starting Cleanup ---"
+for SESS in "${SESSIONS[@]}"; do
+    if tmux has-session -t "$SESS" 2>/dev/null; then
+        tmux kill-session -t "$SESS"
+    fi
+done
+
+# --- 3. Session Creation Phase ---
+
+# --- Duck Session ---
+tmux new-session -d -s "duck" -c "$HOME/work" -n "duck"
+tmux send-keys -t "duck":1 "nvim duck.md" C-m
+
+# --- Draft Session ---
+tmux new-session -d -s "draft" -c "$HOME/work" -n "draft"
+tmux send-keys -t "draft":1 "nvim draft.md" C-m
+
+tmux new-window -t "draft":2 -c "$HOME/work" -n "evaluate"
+tmux send-keys -t "draft":2 "nvim evaluate.md" C-m
+
+tmux new-window -t "draft":3 -c "$HOME/work" -n "send"
+
+tmux new-window -t "draft":4 -c "$HOME/work" -n "session end"
+tmux send-keys -t "draft":4 "lazygit" C-m
+
+# --- Scratch Session ---
+tmux new-session -d -s "scratch" -c "$HOME/work" -n "scratch"
+tmux send-keys -t "scratch":1 "nvim scratch.md" C-m
+tmux new-window -t "scratch":2 -c "$HOME/work" -n "zk"
+tmux send-keys -t "scratch":2 "zk "
+tmux new-window -t "scratch":3 -c "$HOME/work" -n "zkc"
+tmux send-keys -t "scratch":3 "zkc"
+
+# --- Wiki Session ---
+tmux new-session -d -s "wiki" -c "$HOME/wiki" -n "wiki"
+
+
+# 2. Create the session (starts with Pane 0)
+tmux new-session -d -s "task" -n "task"
+
+# 3. Split the whole screen into Top and Bottom halves
+# Top will be Pane 0, Bottom will be Pane 1
+tmux split-window -v -t "task"
+
+# 4. Split the TOP half horizontally (Top Left | Top Right)
+# Pane 0 = Calendar, Pane 2 = Clock
+tmux split-window -h -t "task":1.0
+
+# 5. Split the BOTTOM half horizontally (Bottom Left | Bottom Right)
+# Pane 1 = Watson Status, Pane 3 = Workspace
+tmux split-window -h -t "task":1.1
+
+# 6. Split the BOTTOM RIGHT (Pane 3) vertically (Top | Bottom)
+# Pane 3 = Timer, Pane 4 = Controls
+tmux split-window -v -t "task":1.3
+
+# 7. Split the BOTTOM RIGHT BOTTOM (Pane 4) horizontally (Left | Right)
+# Pane 4 = Stop, Pane 5 = Restart
+tmux split-window -h -t "task":1.4
+
+# --- SEND THE COMMANDS ---
+
+# Top Left: Calendar
+# tmux send-keys -t "task":1.0 "while true; do cal -w; sleep 300; clear; done" C-m
+
+# Top Right: Clock
+tmux send-keys -t "task":1.2 "aclock" C-m
+
+# Bottom Left: Watson Status
+tmux send-keys -t "task":1.1 " while true; do cal -w ; sleep 300; clear; done" C-m
+
+# Bottom Right Top: Timer
+tmux send-keys -t "task":1.3 "watch -n 3 watson status" C-m
+
+# Bottom Right Bottom Left: Watson Stop
+tmux send-keys -t "task":1.4 "watson stop"
+
+# Bottom Right Bottom Right: Watson Restart
+tmux send-keys -t "task":1.5 "watson restart"
+
+# Focus the Watson Status pane
+tmux select-pane -t "task":1.1
+
+# --- Autoshot Session ---
+tmux new-session -d -s "autoshot" -n "shots"
+tmux split-window -h -t "autoshot":1.1
+tmux split-window -v -t "autoshot":1.2
+tmux send-keys -t "autoshot":1.1 "watch -n 1 \"ps -eo pid,stat,args | grep '[a]utoshot.sh'\"" C-m
+tmux send-keys -t "autoshot":1.2 "autoshot-stop"
+tmux send-keys -t "autoshot":1.3 "autoshot-start"
+
+
+tmux new-session -d -s "cpu" -n "sensors-cpupower" -c "$HOME"
+tmux split-window -h -t "cpu":1.1
+tmux split-window -v -t "cpu":1.2
+tmux split-window -h -t "cpu":1.3
+tmux send-keys -t "cpu":1.1 "watch sensors" C-m
+tmux send-keys -t "cpu":1.2 "watch -n 5 cpupower frequency-info" C-m
+tmux send-keys -t "cpu":1.3 "sudo cpupower frequency-set -u 2800mhz"
+tmux send-keys -t "cpu":1.4 "sudo cpupower frequency-set -g performance"
+
+
+# --- Btop Session ---
+tmux new-session -d -s "btop" -n "btop" -c "$HOME"
+tmux split-window -h -t "btop":1 -p 9
+tmux send-keys -t "btop":1.1 "btop" C-m
+tmux send-keys -t "btop":1.2 "ping 8.8.8.8" C-m
+
+tmux new-window -t "btop":2 -c "$HOME" -n "nethogs"
+# tmux split-window -h -t "btop":2.1
+# tmux split-window -v -t "btop":2.2
+tmux send-keys -t "btop":2.1 "nethogs" C-m
+# tmux send-keys -t "btop":2.2 "sudo cpupower frequency-set -u 2800mhz"
+# tmux send-keys -t "btop":2.3 "sudo cpupower frequency-set -g performance"
+
+# --- Utilities & Jobs ---
+# Dropdown session creation was removed from here
+tmux new-session -d -s "config"
+tmux new-session -d -s "mixer" -n "pulsemixer"
+
+tmux new-session -d -s "jobs" -n "jobs"
+tmux new-window -t "jobs":2 -n "pocket-tts"
+tmux send-keys -t "jobs":2 "pocket-tts"  # No C-m
+
+tmux new-session -d -s "logs" -n "journalctl"
+tmux send-keys -t "logs":1 "journalctl -f" C-m
+
+
+# --- Brightness Session (4 Panes Grid) ---
+tmux new-session -d -s "brightness" -n "brightness"
+
+# 1. Split Left/Right
+tmux split-window -h -t "brightness":1.1
+
+# 2. Split the first pane (Left) down
+tmux split-window -v -t "brightness":1.1
+
+# 3. Split the second pane (Right) down
+tmux split-window -v -t "brightness":1.2
+
+# 4. FIX THE BOX: This makes all 4 panes equal sizes
+tmux select-layout -t "brightness":1 tiled
+
+# --- Sync Session ---
+tmux new-session -d -s "sync" -n "dev" -c "$HOME/dev"
+tmux send-keys -t "sync":1 "watch -n 30 git status" C-m
+
+tmux new-window -t "sync":2 -n "work" -c "$HOME/work"
+tmux send-keys -t "sync":2 "watch -n 30 git status" C-m
+
+tmux new-window -t "sync":3 -n "wiki" -c "$HOME/wiki"
+tmux send-keys -t "sync":3 "watch -n 30 git status" C-m
+
+tmux new-window -t "sync":4 -n "archive" -c "$HOME/archive_fossil/"
+tmux send-keys -t "sync":4 "git status" # No C-m
+
+# --- Phone ---
+# tmux new-session -d -s "phone" -c "$HOME" -n "scrcpy"
+# tmux split-window -t "phone":1.1 -h
+# tmux send-keys -t "phone":1.1 "adb devices"
+# tmux send-keys -t "phone":1.2 "scrcpy -m1200 -b5M --max-fps=30 --no-audio --stay-awake"
+# tmux new-window -t "phone":2 -c "$HOME" -n "adb"
+
+
+# Kill existing session for a clean start
+tmux kill-session -t "brightness" 2>/dev/null
+
+# --- WINDOW 1: Brightness Controls ---
+tmux new-session -d -s "brightness" -n "brightness-"
+tmux split-window -v -t "brightness":1
+tmux split-window -h -t "brightness":1.1
+tmux split-window -h -t "brightness":1.2
+
+# Top Left (1.1): HDMI Decrease
+tmux send-keys -t "brightness":1.1 "xrandr --output HDMI-1 --brightness 0.7"
+# Top Right (1.2): eDP Decrease
+tmux send-keys -t "brightness":1.2 "xrandr --output eDP-1 --brightness 0.5"
+# Bottom Left (1.3): HDMI Increase
+tmux send-keys -t "brightness":1.3 "xrandr --output HDMI-1 --brightness 1.0"
+# Bottom Right (1.4): eDP Increase
+tmux send-keys -t "brightness":1.4 "xrandr --output eDP-1 --brightness 1.0"
+
+
+# --- WINDOW 2: Laptop On/Off (NEW) ---
+# 1. Create the second window
+tmux new-window -t "brightness":2 -n "on or off"
+
+# 2. Split it horizontally to get side-by-side panes
+tmux split-window -h -t "brightness":2.1
+
+# 3. Type the commands without hitting Enter (no C-m)
+# Left Pane (2.1)
+tmux send-keys -t "brightness":2.1 "laptop-off"
+
+# Right Pane (2.2)
+tmux send-keys -t "brightness":2.2 "laptop-on"
+
+# Optional: Focus the second window on startup
+tmux select-window -t "brightness":2
+
+
+
+echo "--- Session Creation Complete ---"

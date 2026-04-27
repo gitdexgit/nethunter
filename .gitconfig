@@ -1,0 +1,5 @@
+[safe]
+	directory = *
+[user]
+	email = ttdextester@gmail.com
+	name = gitdexgit
