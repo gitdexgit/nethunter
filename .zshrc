@@ -325,6 +325,7 @@ alias s='cd ~/scripts'
 alias a='cd ~/archive_fossil/'
 alias wo='cd ~/work'
 alias wi='cd ~/wiki'
+alias sshd='/usr/sbin/sshd'
 alias cu='cd ~/work/current_struggles/'
 alias so='cd ~/work/sources/'
 
