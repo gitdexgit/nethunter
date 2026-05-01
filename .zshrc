@@ -318,7 +318,7 @@ alias dell='ssh dell'
 alias ads='adb shell'
 
 alias ip='ip --color=auto'
-alias -g xc='| col -b | xclip -selection clipboard'
+alias -g xc='| osc_copy'
 
 alias f='cd ~/fleet'
 alias s='cd ~/scripts'
@@ -604,22 +604,26 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
 compdef _files cat
 
-# Watson completion
-_watson_custom_completion() {
-    local -a commands=(add aggregate cancel config edit frames help log merge projects remove rename report restart start status stop sync tags)
-    (( CURRENT == 2 )) && { _describe -t commands 'watson commands' commands; return }
-    if [[ -z "$_watson_projects_cache" || "$(( SECONDS - _watson_last_cache_update ))" -gt 30 ]]; then
-        _watson_projects_cache=(${(f)"$(watson projects 2>/dev/null)"})
-        _watson_tags_cache=(${(f)"$(watson tags 2>/dev/null | sed 's/^/+/')"})
-        _watson_last_cache_update=$SECONDS
+osc_copy() {
+    # Read the input into a variable
+    local input=$(cat)
+
+    # If input is empty, don't do anything
+    if [ -z "$input" ]; then
+        echo "Nothing to copy (input was empty)."
+        return 1
     fi
-    case $words[2] in
-        start|add|restart|report|log|edit)
-            [[ $words[CURRENT] == +* ]] && _values 'tags' $_watson_tags_cache || _values 'projects' $_watson_projects_cache
-            ;;
-    esac
+
+    # Encode and send to clipboard
+    local data=$(echo -n "$input" | col -b | base64 | tr -d '\n')
+    printf "\e]52;c;%s\a" "$data"
+
+    # Count lines for feedback
+    local lines=$(echo -n "$input" | wc -l)
+    echo "Successfully copied $lines lines to Android clipboard."
 }
-compdef _watson_custom_completion watson
+
+
 
 # --- PATH CONFIG ---
 typeset -U path
